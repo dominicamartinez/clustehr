@@ -1,0 +1,170 @@
+<html>
+   <style>
+      abbr {
+         cursor:help;
+         text-decoration:none;
+         border-bottom:1px dotted rgba(0,0,0,0.4);
+         border-radius:8px;
+      }
+      abbr:hover {background:rgba(0,0,0,0.1);}
+      abbr span {
+         position:absolute;
+         display:none;
+         z-index:10;
+         padding:2px 4px 0; margin:1.5em 0 0 8px;
+         max-width:0px;
+         border:1px solid green;
+         border-radius:6px;
+         box-shadow:2px 2px 4px rgba(0,128,0,.5);
+         background:linear-gradient(#dfd, #bfb);
+         visibility:hidden; opacity:0;
+         -webkit-transition:
+            visibility 2s linear,
+            opacity 2s linear;
+         transition:
+            visibility 2s linear,
+            opacity 2s linear;
+      }
+      abbr:hover span{
+         display:inline-block;
+         max-width:300px;
+         visibility:visible; opacity:1;
+         -webkit-transition-delay:0s;
+         transition-delay:0s;
+      }
+   </style>
+
+   <script type="text/javascript">
+      window.onload = function(){ 
+         var autoGenParamsCheckbox = document.getElementById("autoGenParams");
+         var discretizationStrategyDropdown = document.getElementById("dStrat");
+         var autoDiscretizeCheckbox = document.getElementById("autoDiscretize");
+         var myParametersDiv=document.getElementById('myParameters');
+         var myDiscretizeDiv=document.getElementById('discretizeStrategy');
+         var myQuantileDiv=document.getElementById('myQuantile');
+
+         autoGenParamsCheckbox.onclick = function() {
+            if (autoGenParamsCheckbox.checked) {
+               myParametersDiv.style.display = "none";
+            }
+            else {
+               myParametersDiv.style.display = "block";
+            }
+         };
+
+         autoDiscretizeCheckbox.onclick = function() {
+            if (autoDiscretizeCheckbox.checked) {
+               myDiscretizeDiv.style.display = "block";
+               if ('pqcut' == discretizationStrategyDropdown.value) {
+                  myQuantileDiv.style.display = "block";
+               }
+               else {
+                  myQuantileDiv.style.display = "none";
+               }
+            }
+            else {
+               myDiscretizeDiv.style.display = "none";
+               myQuantileDiv.style.display = "none";
+            }
+         };
+
+         discretizationStrategyDropdown.onchange = function() {
+            if ('pqcut' == discretizationStrategyDropdown.value) {
+               myQuantileDiv.style.display = "block";
+            }
+            else {
+               myQuantileDiv.style.display = "none";
+            }
+         };
+      };
+
+      function validateRangeZeroToOneMinAc() {
+         let x = document.getElementById("minAc").value;
+         if (isNaN(x) || x <= 0 || x > 1) {
+            document.getElementById("minAcLabel").style.color = 'red';
+         } else {
+            document.getElementById("minAcLabel").style.color = 'black';
+         }
+      }
+
+      function validateRangeZeroToOneMinSup() {
+         let x = document.getElementById("minSup").value;
+         if (isNaN(x) || x <= 0 || x > 1) {
+            document.getElementById("minSupLabel").style.color = 'red';
+         } else {
+            document.getElementById("minSupLabel").style.color = 'black';
+         }
+      }
+
+      function validateIntegerMinOv() {
+         let x = document.getElementById("minOv").value;
+         if (!isNaN(x) && (parseFloat(x) | 0) === parseFloat(x) && x > 0) {
+            document.getElementById("minOvLabel").style.color = 'black';
+         } else {
+            document.getElementById("minOvLabel").style.color = 'red';
+         }
+      }
+
+      function validateIntegerK() {
+         let x = document.getElementById("k").value;
+         if (!isNaN(x) && (parseFloat(x) | 0) === parseFloat(x) && x > 0) {
+            document.getElementById("kLabel").style.color = 'black';
+         } else {
+            document.getElementById("kLabel").style.color = 'red';
+         }
+      }
+   </script>
+
+   <body>
+      <img src="static/clustEHRlogo.png">
+      <form action = "http://localhost:5000/process" method = "POST" 
+         enctype = "multipart/form-data" autocomplete="off">
+         <br>
+         Please select file for upload:
+         <br>
+         <br>
+         <input type = "file" name = "file" id = "file"/><br>
+         <br>
+         <label for="oneDiagnosisPerLine">One Diagnosis Per Line:</label>
+         <input type = "checkbox" name = "oneDiagnosisPerLine" /><br>
+         <br>
+         <label for="containsTemporalData">Contains Temporal Data:</label>
+         <input type = "checkbox" name = "containsTemporalData" /><br>
+         <br>
+         <label for="autoGenParams">Autogenerate Parameters:</label>
+         <input type = "checkbox" name = "autoGenParams" id = "autoGenParams" checked/><br>
+         <br>
+         <div class="myParameters" id="myParameters" style="display:none;">
+            <label for="minAc" id = "minAcLabel">&emsp; minAc:</label>
+            <input type = "text" name = "minAc" id = "minAc" onkeyup="validateRangeZeroToOneMinAc()"/>  <abbr>?<span><b>Minimum All-Confidence</b><br>Value: Real Number in (0 - 1]</span></abbr><br>
+            <br>
+            <label for="minOv" id = "minOvLabel">&emsp; minOv:</label>
+            <input type = "text" name = "minOv" id = "minOv" onkeyup="validateIntegerMinOv()"/>  <abbr>?<span><b>Minimum Overlap</b><br>Value: Integer in (0 - infinity)</span></abbr><br>
+            <br>
+            <label for="minSup" id = "minSupLabel">&emsp; minSup:</label>
+            <input type = "text" name = "minSup" id = "minSup" onkeyup="validateRangeZeroToOneMinSup()"/>  <abbr>?<span><b>Minimum Support</b><br>Value: Real Number in  (0 - 1]</span></abbr><br>
+            <br>
+            <label for="k" id = "kLabel">&emsp; k:</label>
+            <input type = "text" name = "k" id = "k" onkeyup="validateIntegerK()"/>  <abbr>?<span><b>Number of clusters</b><br>Value: Integer in (0 - infinity)</span></abbr><br>
+            <br>
+         </div>
+         <label for="autoDiscretize">Autodiscretize Age:</label>
+         <input type = "checkbox" name = "autoDiscretize" id = "autoDiscretize" /><br>
+         <br>
+         <div class="discretizeStrategy" id="discretizeStrategy" style="display:none;">
+            <label for="dStrat">&emsp; Choose a strategy:</label>
+            <select name="dStrat" id="dStrat">
+               <option value="optbin">Optimal Binning</option>
+               <option value="pqcut">Quantiles</option>
+            </select>
+         </div>
+         <br>
+         <div class="myQuantile" id="myQuantile" style="display:none;">
+            <label for="q">&emsp;&emsp; Number of quantiles:</label>
+            <input type = "text" name = "q" id = "q"/><br>
+            <br>
+         </div>
+         <input type = "submit" />
+      </form>
+   </body>
+</html>
